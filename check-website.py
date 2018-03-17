@@ -9,16 +9,19 @@ import requests
 import configparser
 import sys
 
-arguments = """Usage: check-website.py [-c <configfile>] | -u <url> [ -i <interval>] | [-h] [-v]
+DEFAULT_INTERVAL=30
+TIMEOUT=5
+
+ARGUMENTS = """Usage: check-website.py [-c <configfile>] | -u <url> [ -i <interval>] | [-h] [-v]
 
 Options:
     -h --help       Show this
     -v --version    Show version
     -c <configfile> Use this as configuration file
     -u <url>        Use this url to check
-    -i <interval>   Check interval in seconds, default 5 second 
+    -i <interval>   Check interval in seconds, default {0} second 
 
-"""
+""".format(DEFAULT_INTERVAL)
 
 _VERSION_ = "0.1"
 
@@ -31,7 +34,7 @@ class WebsiteChecker():
     slack_url = None
 
     def __init__(self):
-        self.doc = docopt(arguments)
+        self.doc = docopt(ARGUMENTS)
 
     def run(self):
         self.parse_arguments()
@@ -39,23 +42,28 @@ class WebsiteChecker():
 
     def parse_arguments(self):
 
+        # Ok you wanted to see the version.
+        # Do it and exit.
         if self.doc["--version"]:
             print(_VERSION_)
             sys.exit()
 
+        # Then either a config file is given:
         if self.doc["-c"]:
             self.read_config()
-            
+
+        # Or a single site is given.
         if self.doc["-u"]:
             self.websites[self.doc["-u"]] = "UP"
-            self.interval = self.doc["-i"] or 5
+            self.interval = self.doc["-i"] or DEFAULT_INTERVAL
 
     def check_websites(self):
 
+        # We do not want to preoccupy us with SSL shit.
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+        # No need to check NULL websites, we are done.
         if len(self.websites) == 0:
-
             sys.exit()
 
         print("Checking sites:\n")
@@ -73,7 +81,7 @@ class WebsiteChecker():
                 sys.stdout.flush()
 
                 try:
-                    requests.head(site, timeout=5, verify=False)
+                    requests.head(site, timeout=self.doc.get("settings", "timeout") or TIMEOUT, verify=False)
 
                     if self.websites[site] == "DOWN":
                         print("Yey! {0} is up again!".format(site), end="")
@@ -99,26 +107,25 @@ class WebsiteChecker():
 
     def read_config(self):
 
+        # Read the config file given.
         config = configparser.ConfigParser()
         config.read(self.doc["-c"])
 
+        # Get the settings
         self.interval = config.get("settings", "interval")
-
         self.slack_url = config.get("settings", "slack_url")
 
+        # Declare each site as initiallly UP
         for site in config.get("settings", "sites").split(" "):
-
+            # Scheme must be provided eg: "http://www.google.com" , and not "google.com"
             if site.find("http") == 0:
-
                 self.websites[site] = "UP"
 
     def sendslack(self, site, state):
 
+        # No Slack thus quit.
         if not self.slack_url:
             return
-
-        print(self.slack_url)
-
 
         timestamp = strftime("%Y-%m-%d %H:%M:%S")
 
