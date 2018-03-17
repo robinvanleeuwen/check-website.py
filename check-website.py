@@ -73,7 +73,7 @@ class WebsiteChecker():
                 sys.stdout.flush()
 
                 try:
-                    requests.head(site, timeout=2, verify=False)
+                    requests.head(site, timeout=5, verify=False)
 
                     if self.websites[site] == "DOWN":
                         print("Yey! {0} is up again!".format(site), end="")
@@ -138,7 +138,6 @@ class WebsiteChecker():
 
         try:
             response = requests.post(self.slack_url, json=payload, headers=headers)
-            print("")
         except Exception as e:
             print(e)
 
