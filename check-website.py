@@ -29,6 +29,7 @@ class WebsiteChecker():
     websites = dict()
     interval = 0
     slack_url = None
+    identifier = ""
 
     def __init__(self):
         self.doc = docopt(arguments)
@@ -48,7 +49,7 @@ class WebsiteChecker():
             
         if self.doc["-u"]:
             self.websites[self.doc["-u"]] = "UP"
-            self.interval = self.doc["-i"] or 5
+            self.interval = self.doc["-i"] or 10
 
     def check_websites(self):
 
@@ -72,13 +73,15 @@ class WebsiteChecker():
                 print(".", end="")
                 sys.stdout.flush()
 
+                timestamp = strftime("%Y-%m-%d %H:%M:%S")
+
                 try:
-                    requests.head(site, timeout=5, verify=False)
+                    requests.head(site, timeout=10, verify=False)
 
                     if self.websites[site] == "DOWN":
-                        print("Yey! {0} is up again!".format(site), end="")
+                        print("Yey! {0} is up again! {1}".format(site, timestamp), end="")
                         sys.stdout.flush()
-                        self.sendslack(site, state="up")
+                        self.sendslack(site, state="up", timestamp=timestamp)
                         self.websites[site] = "UP"
                         continue
 
@@ -89,9 +92,9 @@ class WebsiteChecker():
 
                     if self.websites[site] == "UP":
                         self.websites[site] = "DOWN"
-                        print("{0} IS DOWN!".format(site), end="")
+                        print("{0} IS DOWN! {1}".format(site, timestamp), end="")
                         sys.stdout.flush()
-                        self.sendslack(site, state="down")
+                        self.sendslack(site, state="down", timestamp=timestamp)
                         continue
 
             print(".", end="")
@@ -103,7 +106,7 @@ class WebsiteChecker():
         config.read(self.doc["-c"])
 
         self.interval = config.get("settings", "interval")
-
+        self.identifier = config.get("settings", "identifier")
         self.slack_url = config.get("settings", "slack_url")
 
         for site in config.get("settings", "sites").split(" "):
@@ -112,26 +115,23 @@ class WebsiteChecker():
 
                 self.websites[site] = "UP"
 
-    def sendslack(self, site, state):
+    def sendslack(self, site, state, timestamp=None):
 
         if not self.slack_url:
             return
 
         print(self.slack_url)
 
-
-        timestamp = strftime("%Y-%m-%d %H:%M:%S")
-
         if state == "up":
 
             payload = {
-                "text": "Rigter Website Monitor: Yey! :+1: :+1: :+1: *{0}* is up again! ({1})".format(site, timestamp)
+                "text": "{0}: Yey! :+1: :+1: :+1: *{1}* is up again! ({2})".format(self.identifier, site, timestamp)
             }
 
         elif state == "down":
 
             payload = {
-                "text": "Rigter Website Monitor: *{0}* is DOWN :sob: ({1})".format(site, timestamp)
+                "text": "{0}: *{1}* is DOWN :sob: ({2})".format(self.identifier, site, timestamp)
             }
 
         headers = {'Content-Type': 'application/json'}
