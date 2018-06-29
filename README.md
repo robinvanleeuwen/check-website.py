@@ -9,22 +9,25 @@ is up or down.
 You can run this utility on the terminal directly or integrate it
 in a systemd service and run it in a screen:
 
-   Desription=Check Websites
-   After=network.target
+    /usr/systemd/system/check-website.service
+
+    
+    Desription=Check Websites
+    After=network.target
         
-   [Service]
-   Type=forking
-   User=root
-   Group=root
-   StandardInput=null
-   StandardOutput=journal
-   StandardError=journal
-   Environment=
-   WorkingDirectory=/root
-   ExecStart=/usr/bin/screen -dmS check-websites /usr/local/bin/check-website.py -c /etc/websites.conf 
-   Restart=on-abort
-  
-   [Install]
-   WantedBy=multi-user.target
+    [Service]
+    Type=forking
+    User=root
+    Group=root
+    StandardInput=null
+    StandardOutput=journal
+    StandardError=journal
+    Environment=
+    WorkingDirectory=/root
+    ExecStart=/usr/bin/screen -dmS check-websites /usr/local/bin/check-website.py -c /etc/websites.conf 
+    Restart=on-abort
+     
+    [Install]
+    WantedBy=multi-user.target
 
 
