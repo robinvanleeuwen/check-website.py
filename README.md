@@ -1,4 +1,4 @@
-# check-website
+# check-website 1.0 
 
 This is a utility to periodically check if websites are online.
 It prints to the terminal if a website is up or down, and can send a message to a slack.com webhook channel.
