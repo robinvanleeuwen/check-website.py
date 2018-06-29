@@ -105,7 +105,6 @@ class WebsiteChecker():
                         self.sendslack(site, state="down", timestamp=timestamp)
                         continue
 
-            print(".", end="")
             sleep(int(self.interval))
 
     def read_config(self):
