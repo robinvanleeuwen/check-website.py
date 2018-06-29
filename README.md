@@ -16,7 +16,7 @@ are doing.
         -v --version    Show version
         -c <configfile> Use this as configuration file
         -u <url>        Use this url to check
-        -i <interval>   Check interval in seconds, default 30 second 
+        -i <interval>   Check interval in seconds, default 10 seconds
 
 For example:
 

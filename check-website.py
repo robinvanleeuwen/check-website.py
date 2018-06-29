@@ -9,7 +9,7 @@ import requests
 import configparser
 import sys
 
-DEFAULT_INTERVAL=30
+DEFAULT_INTERVAL=10
 TIMEOUT=5
 
 ARGUMENTS = """Usage: check-website.py [-c <configfile>] | -u <url> [ -i <interval>] | [-h] [-v]
@@ -19,7 +19,7 @@ Options:
     -v --version    Show version
     -c <configfile> Use this as configuration file
     -u <url>        Use this url to check
-    -i <interval>   Check interval in seconds, default {0} second 
+    -i <interval>   Check interval in seconds, default {0} seconds
 
 """.format(DEFAULT_INTERVAL)
 
@@ -56,7 +56,7 @@ class WebsiteChecker():
         # Or a single site is given.
         if self.doc["-u"]:
             self.websites[self.doc["-u"]] = "UP"
-            self.interval = self.doc["-i"] or 10
+            self.interval = self.doc["-i"] or DEFAULT_INTERVAL
 
     def check_websites(self):
 
