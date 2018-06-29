@@ -30,7 +30,7 @@ For example:
     
 or
 
-    rvl@studio80:~/check-website$ ./check-website.py -u https://www.thissiteisdown.ugh -i 10
+    rvl@banana:~/check-website$ ./check-website.py -u https://www.thissiteisdown.ugh -i 10
     Checking sites:
 
     https://www.thissiteisdown.ugh
