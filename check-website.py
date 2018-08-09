@@ -23,7 +23,7 @@ Options:
 
 """.format(DEFAULT_INTERVAL)
 
-_VERSION_ = "1.0"
+_VERSION_ = "1.1"
 
 
 class WebsiteChecker():
