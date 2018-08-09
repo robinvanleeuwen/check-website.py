@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-
+import socket
 from time import sleep
 from time import strftime
 from docopt import docopt
@@ -30,6 +30,7 @@ class WebsiteChecker():
 
     doc = None
     websites = dict()
+    tcphosts = dict()
     interval = 0
     slack_url = None
     identifier = ""
@@ -56,7 +57,9 @@ class WebsiteChecker():
         # Or a single site is given.
         if self.doc["-u"]:
             self.websites[self.doc["-u"]] = "UP"
-            self.interval = self.doc["-i"] or DEFAULT_INTERVAL
+
+        self.interval = self.doc["-i"] or DEFAULT_INTERVAL
+
 
     def check_websites(self):
 
@@ -71,6 +74,11 @@ class WebsiteChecker():
 
         for site in self.websites:
             print(site)
+
+        print("\nAnd TCP hosts:\n")
+
+        for host in self.tcphosts:
+            print(host)
 
         print("\nWith an interval of {0} seconds.".format(self.interval))
 
@@ -105,6 +113,27 @@ class WebsiteChecker():
                         self.sendslack(site, state="down", timestamp=timestamp)
                         continue
 
+            for host in self.tcphosts:
+                print("t", end="")
+                sys.stdout.flush()
+                try:
+                    self.connect_tcp(host.split(":")[0], host.split(":")[1])
+
+                    if self.tcphosts[host] == "DOWN":
+                        print("Yey! {0} is up again! {1}".format(host, timestamp), end="")
+                        sys.stdout.flush()
+                        self.sendslack(host, state="up", timestamp=timestamp)
+                        self.tcphosts[host] = "UP"
+                        continue
+
+                except OSError as e:
+                    if self.tcphosts[host] == "UP":
+                        self.tcphosts[host] = "DOWN"
+                        print("{0} IS DOWN! {1}".format(host, timestamp), end="")
+                        sys.stdout.flush()
+                        self.sendslack(host, state="down", timestamp=timestamp)
+                        continue
+
             sleep(int(self.interval))
 
     def read_config(self):
@@ -123,6 +152,10 @@ class WebsiteChecker():
             # Scheme must be provided eg: "http://www.google.com" , and not "google.com"
             if site.find("http") == 0:
                 self.websites[site] = "UP"
+
+        for host in config.get("settings", "tcp").split(" "):
+            self.tcphosts[host] = "UP"
+
 
     def sendslack(self, site, state, timestamp=None):
 
@@ -150,6 +183,14 @@ class WebsiteChecker():
             response = requests.post(self.slack_url, json=payload, headers=headers)
         except Exception as e:
             print(e)
+
+
+    def connect_tcp(self, address, port):
+        address = address.lstrip("\"")
+        port = port.rstrip("\"")
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((address, int(port)))
+        s.close()
 
 
 if __name__ == "__main__":
