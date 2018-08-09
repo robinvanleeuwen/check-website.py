@@ -67,7 +67,10 @@ class WebsiteChecker():
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
         # No need to check NULL websites, we are done.
-        if len(self.websites) == 0:
+        print("Cheking {0} sites and {1} TCP hosts".format(len(self.websites), len(self.tcphosts)))
+
+        if len(self.websites) == 0 and len(self.tcphosts) == 0:
+            print("Nothing to check...\n")
             sys.exit()
 
         print("Checking sites:\n")
@@ -85,6 +88,9 @@ class WebsiteChecker():
         while True:
 
             for site in self.websites:
+
+                if site == "":
+                    continue
 
                 print(".", end="")
                 sys.stdout.flush()
@@ -114,8 +120,13 @@ class WebsiteChecker():
                         continue
 
             for host in self.tcphosts:
+
+                if host == "":
+                    continue
+
                 print("t", end="")
                 sys.stdout.flush()
+
                 try:
                     self.connect_tcp(host.split(":")[0], host.split(":")[1])
 
@@ -154,7 +165,8 @@ class WebsiteChecker():
                 self.websites[site] = "UP"
 
         for host in config.get("settings", "tcp").split(" "):
-            self.tcphosts[host] = "UP"
+            if host != "":
+                self.tcphosts[host] = "UP"
 
 
     def sendslack(self, site, state, timestamp=None):
