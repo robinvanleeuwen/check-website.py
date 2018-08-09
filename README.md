@@ -1,4 +1,4 @@
-# check-website 1.0 
+# check-website 1.1
 
 This is a utility to periodically check if websites are online.
 It prints to the terminal if a website is up or down, and can send a message to a slack.com webhook channel.
@@ -45,9 +45,9 @@ Or you can use a config file with multiple sites and send a message to a slack.c
 You can run this utility on the terminal directly or integrate it
 in a systemd service and run it in a screen:
 
-    /usr/systemd/system/check-website.service
+    /lib/systemd/system/check-website.service
 
-    
+    [Unit]
     Desription=Check Websites
     After=network.target
         
