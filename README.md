@@ -42,8 +42,7 @@ Or you can use a config file with multiple sites and send a message to a slack.c
 
 ## Setup as service
 
-You can run this utility on the terminal directly or integrate it
-in a systemd service and run it in a screen:
+The script could be (re)written as a daemon and logging to a logfile, but for simplicity you can run this utility on the terminal directly or integrate it in a systemd service and run it in a screen:
 
     /lib/systemd/system/check-website.service
 
