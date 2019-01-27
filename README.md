@@ -1,6 +1,6 @@
 # check-website 1.1
 
-This is a utility to periodically check if websites are online.
+This is a utility to periodically check if websites are online. There are a lot of utilities to do this (nagios etc), which offer a lot of functionality. This is script is intended as a simple check to see if a website is up or not. 
 It prints to the terminal if a website is up or down, and can send a message to a slack.com webhook channel.
 
 ## Usage from commandline
